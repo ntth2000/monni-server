@@ -51,14 +51,4 @@ public class Spending {
     public void setUser(User user) {
         this.user = user;
     }
-
-    public Spending(long amount, String category, String description, LocalDate date, User user) {
-        this.amount = amount;
-        this.category = category;
-        this.description = description;
-        this.date = date;
-        this.user = user;
-    }
-
-
 }
