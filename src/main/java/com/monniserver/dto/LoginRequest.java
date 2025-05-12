@@ -1,13 +1,19 @@
 package com.monniserver.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
 
-@Data
 public class LoginRequest {
     @NotBlank(message = "Username is required")
-    public String username;
+    private String username;
 
     @NotBlank(message = "Password is required")
-    public String password;
+    private String password;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
 }

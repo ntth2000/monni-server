@@ -1,20 +1,14 @@
 package com.monniserver.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "history")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class History {
+@Table(name = "conversation")
+public class Conversation {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -32,4 +26,33 @@ public class History {
     @CreationTimestamp
     @Column(name = "created_at")
     private ZonedDateTime createdAt;
+
+    public Conversation(User user, String question, String answer, ZonedDateTime createdAt) {
+        this.user = user;
+        this.question = question;
+        this.answer = answer;
+        this.createdAt = createdAt;
+    }
+
+    public Conversation() {}
+
+    public UUID getId() {
+        return id;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public String getAnswer() {
+        return answer;
+    }
+
+    public ZonedDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public User getUser() {
+        return user;
+    }
 }

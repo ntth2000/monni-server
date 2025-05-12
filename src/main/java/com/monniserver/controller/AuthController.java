@@ -8,18 +8,22 @@ import com.monniserver.entity.User;
 import com.monniserver.service.AuthService;
 import com.monniserver.service.RefreshTokenService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
+
+    public AuthController(AuthService authService, JwtUtil jwtUtil, RefreshTokenService refreshTokenService) {
+        this.authService = authService;
+        this.jwtUtil = jwtUtil;
+        this.refreshTokenService = refreshTokenService;
+    }
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody @Valid RegisterRequest request) {
@@ -35,5 +39,11 @@ public class AuthController {
         String refreshToken = refreshTokenService.createRefreshToken(user).getToken();
 
         return ResponseEntity.ok(new AuthTokenResponse(accessToken, refreshToken));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@RequestHeader("X-Refresh-Token") String refreshToken){
+        refreshTokenService.deleteByToken(refreshToken);
+        return ResponseEntity.ok("Logout successful");
     }
 }

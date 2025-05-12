@@ -3,8 +3,8 @@ package com.monniserver.service;
 import com.monniserver.entity.RefreshToken;
 import com.monniserver.entity.User;
 import com.monniserver.repository.RefreshTokenRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -12,10 +12,13 @@ import java.util.Optional;
 
 
 @Service
-@RequiredArgsConstructor
 public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final long refreshTokenExpirationTime = 7 * 24 * 60 * 60 * 1000;
+
+    public RefreshTokenService(RefreshTokenRepository refreshTokenRepository) {
+        this.refreshTokenRepository = refreshTokenRepository;
+    }
 
     public RefreshToken createRefreshToken(User user) {
         RefreshToken token = new RefreshToken();
@@ -34,5 +37,10 @@ public class RefreshTokenService {
     public Optional<User> getUserFromRefreshToken(String token) {
         return refreshTokenRepository.findByToken(token)
                 .map(RefreshToken::getUser);
+    }
+
+    @Transactional
+    public void deleteByToken(String token) {
+        refreshTokenRepository.deleteByToken(token);
     }
 }

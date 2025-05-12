@@ -6,29 +6,32 @@ import com.monniserver.entity.User;
 import com.monniserver.exception.InvalidCredentialsException;
 import com.monniserver.exception.UsernameAlreadyExistsException;
 import com.monniserver.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public User register(RegisterRequest request){
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public void register(RegisterRequest request){
         boolean isUserExists = userRepository.existsByUsername(request.getUsername());
         if (isUserExists) {
             throw new UsernameAlreadyExistsException("Username already exists");
         }
 
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        String username = request.getUsername();
+        String password = passwordEncoder.encode(request.getPassword());
+        User user = new User(username, password);
 
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
     public User login(LoginRequest request) {
