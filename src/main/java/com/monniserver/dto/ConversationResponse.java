@@ -9,6 +9,8 @@ public class ConversationResponse {
     private String answer;
     private ZonedDateTime createdAt;
 
+    public ConversationResponse() {}
+
     public ConversationResponse(UUID id, String question, String answer, ZonedDateTime createdAt) {
         this.id = id;
         this.question = question;
@@ -20,15 +22,31 @@ public class ConversationResponse {
         return id;
     }
 
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
     public String getAnswer() {
         return answer;
+    }
+
+    public void setAnswer(String answer) {
+        this.answer = answer;
     }
 
     public String getQuestion() {
         return question;
     }
 
+    public void setQuestion(String question) {
+        this.question = question;
+    }
+
     public ZonedDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public void setCreatedAt(ZonedDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

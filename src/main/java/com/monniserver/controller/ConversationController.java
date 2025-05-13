@@ -3,6 +3,8 @@ package com.monniserver.controller;
 import com.monniserver.config.JwtUtil;
 import com.monniserver.dto.ConversationRequest;
 import com.monniserver.dto.ConversationResponse;
+import com.monniserver.entity.User;
+import com.monniserver.repository.UserRepository;
 import com.monniserver.service.ConversationService;
 import com.monniserver.service.OpenAIService;
 import com.openai.models.chat.completions.ChatCompletion;
@@ -19,12 +21,10 @@ import java.util.UUID;
 public class ConversationController {
     private final ConversationService conversationService;
     private final JwtUtil jwtUtil;
-    private final OpenAIService openAIService;
 
-    public ConversationController(ConversationService conversationService, JwtUtil jwtUtil, OpenAIService openAIService) {
+    public ConversationController(ConversationService conversationService, JwtUtil jwtUtil) {
         this.conversationService = conversationService;
         this.jwtUtil = jwtUtil;
-        this.openAIService = openAIService;
     }
 
     @GetMapping
@@ -34,10 +34,10 @@ public class ConversationController {
     }
 
     @PostMapping
-    public ResponseEntity<String> addConversation(@RequestBody ConversationRequest request,
+    public ResponseEntity<ConversationResponse> addConversation(@RequestBody ConversationRequest request,
                                                           @RequestHeader("Authorization") String authHeader){
         UUID userId = jwtUtil.getUserIdFromToken(authHeader.substring(7));
-        System.out.println("User id: " + userId);
-        return ResponseEntity.ok(openAIService.handleUserRequest(request.getQuestion()));
+
+        return ResponseEntity.ok(conversationService.addNewQuestion(request.getQuestion(), userId));
     }
 }

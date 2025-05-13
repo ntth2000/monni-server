@@ -10,6 +10,6 @@ import java.util.UUID;
 
 @Repository
 public interface ConversationRepository extends JpaRepository<Conversation, UUID> {
-    @Query("SELECT h FROM Conversation h WHERE h.user.id = :userId ORDER BY h.createdAt DESC")
-    public List<Conversation> findByUserIdOrderByCreatedAtDesc(UUID userId);
+    @Query("SELECT h FROM Conversation h WHERE h.user.id = :userId ORDER BY h.createdAt ASC")
+    public List<Conversation> findByUserIdOrderByCreatedAtAsc(UUID userId);
 }

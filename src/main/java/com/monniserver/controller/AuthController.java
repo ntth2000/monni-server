@@ -64,6 +64,8 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@RequestHeader("X-Refresh-Token") String refreshToken){
+        System.out.println("Token BE nhận được: " + refreshToken);
+
         refreshTokenService.deleteByToken(refreshToken);
         return ResponseEntity.ok("Logout successful");
     }
