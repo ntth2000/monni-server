@@ -18,7 +18,7 @@ public class JwtUtil {
         this.jwtProperties = jwtProperties;
     }
 
-    private SecretKey getSignKey(){
+    private SecretKey getSignKey() {
         return Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
     }
 
@@ -38,13 +38,13 @@ public class JwtUtil {
         try {
             Jwts.parser().verifyWith(getSignKey()).build().parseSignedClaims(jwtToken);
             return true;
-        } catch (JwtException e){
+        } catch (JwtException e) {
             return false;
         }
     }
 
     public UUID getUserIdFromToken(String jwtToken) {
-        String userIdString = Jwts.parser().verifyWith((SecretKey) getSignKey()).build()
+        String userIdString = Jwts.parser().verifyWith(getSignKey()).build()
                 .parseSignedClaims(jwtToken)
                 .getPayload()
                 .getSubject();

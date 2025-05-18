@@ -1,8 +1,8 @@
 package com.monniserver.entity;
 
-import java.util.UUID;
-
 import jakarta.persistence.*;
+
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -11,13 +11,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(unique=true, nullable=false)
+    @Column(unique = true, nullable = false)
     private String username;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String password;
 
-    public User(){
+    public User() {
 
     }
 
@@ -30,16 +30,16 @@ public class User {
         return username;
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public UUID getId() {
         return id;
     }
 
     public String getPassword() {
         return password;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public void setPassword(String password) {

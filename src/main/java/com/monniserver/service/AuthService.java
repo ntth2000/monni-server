@@ -21,7 +21,7 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public void register(RegisterRequest request){
+    public void register(RegisterRequest request) {
         boolean isUserExists = userRepository.existsByUsername(request.getUsername());
         if (isUserExists) {
             throw new UsernameAlreadyExistsException("Username already exists");

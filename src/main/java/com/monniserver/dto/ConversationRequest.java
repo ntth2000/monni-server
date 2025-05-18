@@ -1,8 +1,5 @@
 package com.monniserver.dto;
 
-import java.time.ZonedDateTime;
-import java.util.UUID;
-
 public class ConversationRequest {
     private String question;
 

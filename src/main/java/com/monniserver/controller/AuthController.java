@@ -44,7 +44,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(true) // cần HTTPS nếu production
                 .path("/")
-                .maxAge(60*60) // 1 hour
+                .maxAge(60 * 60) // 1 hour
                 .sameSite("Strict")
                 .build();
 
@@ -63,7 +63,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestHeader("X-Refresh-Token") String refreshToken){
+    public ResponseEntity<String> logout(@RequestHeader("X-Refresh-Token") String refreshToken) {
         System.out.println("Token BE nhận được: " + refreshToken);
 
         refreshTokenService.deleteByToken(refreshToken);

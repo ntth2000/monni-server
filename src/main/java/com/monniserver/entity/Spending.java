@@ -13,7 +13,7 @@ public class Spending {
     private UUID id;
 
     @Column(name = "amount", nullable = false)
-    private long amount;
+    private double amount;
 
     @Column(name = "category", nullable = false)
     private String category;
@@ -28,20 +28,39 @@ public class Spending {
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
 
-    public void setId(UUID id) {
-        this.id = id;
+    public Spending() {
     }
 
-    public void setAmount(long amount) {
+    public Spending(double amount, String category, String description, LocalDate date, User user) {
         this.amount = amount;
+        this.category = category;
+        this.description = description;
+        this.date = date;
+        this.user = user;
+    }
+
+    public UUID getId() {
+        return this.id;
+    }
+
+    public String getCategory() {
+        return this.category;
     }
 
     public void setCategory(String category) {
         this.category = category;
     }
 
+    public String getDescription() {
+        return this.description;
+    }
+
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public LocalDate getDate() {
+        return this.date;
     }
 
     public void setDate(LocalDate date) {
@@ -50,5 +69,13 @@ public class Spending {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
     }
 }

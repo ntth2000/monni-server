@@ -9,7 +9,8 @@ public class ConversationResponse {
     private String answer;
     private ZonedDateTime createdAt;
 
-    public ConversationResponse() {}
+    public ConversationResponse() {
+    }
 
     public ConversationResponse(UUID id, String question, String answer, ZonedDateTime createdAt) {
         this.id = id;

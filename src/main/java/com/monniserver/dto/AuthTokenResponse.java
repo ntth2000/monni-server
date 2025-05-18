@@ -2,8 +2,8 @@ package com.monniserver.dto;
 
 
 public class AuthTokenResponse {
-    private String accessToken;
-    private String refreshToken;
+    private final String accessToken;
+    private final String refreshToken;
 
     public AuthTokenResponse(String accessToken, String refreshToken) {
         this.accessToken = accessToken;

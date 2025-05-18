@@ -30,23 +30,23 @@ public class RefreshToken {
         return token;
     }
 
-    public Instant getExpiryDate() {
-        return expiryDate;
+    public void setToken(String token) {
+        this.token = token;
     }
 
-    public User getUser() {
-        return user;
+    public Instant getExpiryDate() {
+        return expiryDate;
     }
 
     public void setExpiryDate(Instant expiryDate) {
         this.expiryDate = expiryDate;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public User getUser() {
+        return user;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setUser(User user) {
+        this.user = user;
     }
 }
