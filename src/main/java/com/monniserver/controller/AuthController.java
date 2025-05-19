@@ -34,7 +34,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthTokenResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<String> login(@RequestBody LoginRequest request, HttpServletResponse response) {
         User user = authService.login(request);
 
         String accessToken = jwtUtil.generateJwtToken(user.getId());
@@ -42,31 +42,72 @@ public class AuthController {
 
         ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", accessToken)
                 .httpOnly(true)
-                .secure(true) // cần HTTPS nếu production
+                .secure(false)
                 .path("/")
                 .maxAge(60 * 60) // 1 hour
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .build();
 
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-                .secure(true)
+                .secure(false)
                 .path("/")
                 .maxAge(7 * 24 * 60 * 60) // 7 days
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .build();
 
         response.addHeader("Set-Cookie", accessTokenCookie.toString());
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+        response.addHeader("Access-Control-Expose-Headers", "Set-Cookie");
 
-        return ResponseEntity.ok(new AuthTokenResponse(accessToken, refreshToken));
+        return ResponseEntity.ok("Login successfully.");
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestHeader("X-Refresh-Token") String refreshToken) {
-        System.out.println("Token BE nhận được: " + refreshToken);
+    public ResponseEntity<String> logout(@CookieValue(value = "refreshToken", required = false) String refreshToken) {
+        if (refreshToken != null && !refreshToken.isEmpty()) {
+            refreshTokenService.deleteByToken(refreshToken);
+        }
 
-        refreshTokenService.deleteByToken(refreshToken);
-        return ResponseEntity.ok("Logout successful");
+        ResponseCookie clearAccessToken = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+
+        ResponseCookie clearRefreshToken = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
+
+        return ResponseEntity.ok()
+                .header("Set-Cookie", clearAccessToken.toString())
+                .header("Set-Cookie", clearRefreshToken.toString())
+                .body("Logout successful");
     }
+
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthTokenResponse> refresh(@CookieValue("refreshToken") String refreshToken) {
+        User user = refreshTokenService.getUserFromRefreshToken(refreshToken);
+        String newAccessToken = jwtUtil.generateJwtToken(user.getId());
+
+        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", newAccessToken)
+                .httpOnly(true)
+                .secure(false) // false nếu chạy localhost
+                .path("/")
+                .maxAge(60 * 60)
+                .sameSite("Lax")
+                .build();
+
+        return ResponseEntity.ok()
+                .header("Set-Cookie", accessTokenCookie.toString())
+                .body(new AuthTokenResponse(newAccessToken, refreshToken));
+    }
+
 }

@@ -2,6 +2,7 @@ package com.monniserver.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,8 +24,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String authHeader = request.getHeader("Authorization");
-
         String path = request.getServletPath();
 
         if (path.startsWith("/api/auth/")) {
@@ -32,15 +31,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        String accessToken = null;
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("accessToken".equals(cookie.getName())) {
+                    accessToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (accessToken == null || accessToken.isEmpty()) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String jwtToken = authHeader.substring(7);
-
-        if (jwtUtil.isTokenValid(jwtToken)) {
-            UUID userId = jwtUtil.getUserIdFromToken(jwtToken);
+        if (jwtUtil.isTokenValid(accessToken)) {
+            UUID userId = jwtUtil.getUserIdFromToken(accessToken);
 
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userId, null, Collections.emptyList());
 

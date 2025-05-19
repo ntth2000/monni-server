@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
 
 
@@ -34,9 +33,10 @@ public class RefreshTokenService {
                 .isPresent();
     }
 
-    public Optional<User> getUserFromRefreshToken(String token) {
+    public User getUserFromRefreshToken(String token) {
         return refreshTokenRepository.findByToken(token)
-                .map(RefreshToken::getUser);
+                .map(RefreshToken::getUser)
+                .orElse(null);
     }
 
     @Transactional

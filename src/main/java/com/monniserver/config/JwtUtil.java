@@ -39,6 +39,7 @@ public class JwtUtil {
             Jwts.parser().verifyWith(getSignKey()).build().parseSignedClaims(jwtToken);
             return true;
         } catch (JwtException e) {
+            e.printStackTrace();
             return false;
         }
     }

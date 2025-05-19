@@ -23,15 +23,14 @@ public class ConversationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ConversationResponse>> getConversation(@RequestHeader("Authorization") String authHeader) {
-        UUID userId = jwtUtil.getUserIdFromToken(authHeader.substring(7));
+    public ResponseEntity<List<ConversationResponse>> getConversation(@CookieValue("accessToken") String accessToken) {
+        UUID userId = jwtUtil.getUserIdFromToken(accessToken);
         return ResponseEntity.ok(conversationService.findByUserId(userId));
     }
 
     @PostMapping
-    public ResponseEntity<ConversationResponse> addConversation(@RequestBody ConversationRequest request,
-                                                                @RequestHeader("Authorization") String authHeader) throws Exception {
-        UUID userId = jwtUtil.getUserIdFromToken(authHeader.substring(7));
+    public ResponseEntity<ConversationResponse> addConversation(@RequestBody ConversationRequest request, @CookieValue("accessToken") String accessToken) throws Exception {
+        UUID userId = jwtUtil.getUserIdFromToken(accessToken);
 
         return ResponseEntity.ok(conversationService.addNewQuestion(request.getQuestion(), userId));
     }
