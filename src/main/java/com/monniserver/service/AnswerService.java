@@ -35,7 +35,7 @@ public class AnswerService {
                     .append("</strong> là <strong>");
         }
 
-        message.append(String.format("%,.0f", totalAmount)).append("₫</strong>");
+        message.append(this._formatAmount(totalAmount)).append("</strong>");
 
         if (category != null) {
             message.append(" cho mục ").append(category);
@@ -60,7 +60,7 @@ public class AnswerService {
 
         StringBuilder sb = new StringBuilder();
         sb.append("<p>Dưới đây là các khoản chi tiêu chi tiết:</p>");
-        sb.append("<table className='table-auto'>");
+        sb.append("<table>");
         sb.append("<thead><tr>")
                 .append("<th>Giao dịch</th>")
                 .append("<th>Danh mục</th>")
@@ -91,7 +91,7 @@ public class AnswerService {
                 .toList();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Đã lưu các khoản chi tiêu sau:\n");
+        sb.append("Tớ đã lưu các khoản chi tiêu sau rồi nha:\n");
         sb.append("<div><table>");
         sb.append("<thead><tr>")
                 .append("<th>Giao dịch</th>")
@@ -106,7 +106,7 @@ public class AnswerService {
                     .append("<td>").append(item.getDescription()).append("</td>")
                     .append("<td>").append(item.getCategory()).append("</td>")
                     .append("<td>").append(this._formatDate(item.getDate())).append("</td>")
-                    .append("<td>").append(this._formatAmount(item.getAmount())).append("₫</td>")
+                    .append("<td>").append(this._formatAmount(item.getAmount())).append("</td>")
                     .append("</tr>");
         }
 
@@ -141,7 +141,7 @@ public class AnswerService {
                             .append("<td>").append(item.getDescription()).append("</td>")
                             .append("<td>").append(item.getCategory()).append("</td>")
                             .append("<td>").append(item.getDate()).append("</td>")
-                            .append("<td>").append(this._formatAmount(item.getAmount())).append("₫</td>")
+                            .append("<td>").append(this._formatAmount(item.getAmount())).append("</td>")
                             .append("</tr>");
                 }
 
@@ -162,11 +162,11 @@ public class AnswerService {
         if (!successfulDeletions.isEmpty()) {
             if (successfulDeletions.size() == 1) {
                 Spending spending = successfulDeletions.getFirst();
-                sb.append("Tớ đã xoá chi tiêu ")
+                sb.append("Tớ đã xoá <strong>mua ")
                         .append(spending.getDescription())
-                        .append(" thành ").append(this._formatAmount(spending.getAmount())).append(" ngày")
+                        .append(this._formatAmount(spending.getAmount())).append("</strong> ngày <strong>")
                         .append(this._formatDate(spending.getDate()))
-                        .append("cho mục ").append(spending.getCategory()).append(" rồi nha!");
+                        .append("</strong> cho mục <strong>").append(spending.getCategory()).append("</strong> rồi nha!");
             } else {
                 sb.append("<p>Tớ đã xoá các chi tiêu sau rồi nha:</p>");
                 sb.append("<div><table>");
@@ -192,7 +192,7 @@ public class AnswerService {
         }
 
         if (!notFoundSpendings.isEmpty()) {
-            sb.append("<p>Bạn hãy cho tớ thêm thông tin về các khoản còn lại đế tớ xoá nhé. Tớ chưa thể xoá do thiếu thông tin 😊</p>");
+            sb.append("<p>Bạn hãy cho tớ thêm thông tin về các khoản còn lại đế tớ xoá nhé. Tớ chưa thể xoá do thiếu hoặc sai thông tin 😊</p>");
         }
 
         return sb.toString();
