@@ -7,10 +7,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class AnswerService {
@@ -31,14 +28,14 @@ public class AnswerService {
         StringBuilder message = new StringBuilder();
 
         if (startDateFormatted.equals(endDateFormatted)) {
-            message.append("Tổng chi tiêu của bạn trong ngày <strong>").append(startDateFormatted).append("</strong> là ");
+            message.append("<p>Tổng chi tiêu của bạn trong ngày <strong>").append(startDateFormatted).append("</strong> là <strong>");
         } else {
             message.append("Tổng chi tiêu của bạn từ <strong>")
-                    .append(startDateFormatted).append("</strong> đến ").append(endDateFormatted)
-                    .append(" là <strong>");
+                    .append(startDateFormatted).append("</strong> đến <strong>").append(endDateFormatted)
+                    .append("</strong> là <strong>");
         }
 
-        message.append(String.format("%,.0f", totalAmount)).append(" VND <strong/>");
+        message.append(String.format("%,.0f", totalAmount)).append("₫</strong>");
 
         if (category != null) {
             message.append(" cho mục ").append(category);
@@ -47,147 +44,155 @@ public class AnswerService {
             message.append(" (").append(description).append(")");
         }
 
-        message.append(", gồm <strong>").append(count).append(" giao dịch</strong>.");
+        message.append(", gồm <strong>").append(count).append(" giao dịch</strong>.</p>");
 
         return message.toString();
     }
 
     public String generateDetailSpendings(List<Spending> spendings) {
         if (spendings == null || spendings.isEmpty()) {
-            return "Không có khoản chi tiêu nào được tìm thấy.";
+            return "";
         }
 
-        // Group by date and sort by date ascending
-        Map<String, List<Spending>> grouped = spendings.stream()
+        List<Spending> sortedSpendings = spendings.stream()
                 .sorted(Comparator.comparing(Spending::getDate))
-                .collect(Collectors.groupingBy(
-                        s -> s.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                        LinkedHashMap::new, // để giữ thứ tự
-                        Collectors.toList()
-                ));
+                .toList();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Dưới đây là các khoản chi tiêu chi tiết:\n<ul>");
+        sb.append("<p>Dưới đây là các khoản chi tiêu chi tiết:</p>");
+        sb.append("<table className='table-auto'>");
+        sb.append("<thead><tr>")
+                .append("<th>Giao dịch</th>")
+                .append("<th>Danh mục</th>")
+                .append("<th>Ngày</th>")
+                .append("<th>Số tiền</th>")
+                .append("</tr></thead>");
+        sb.append("<tbody>");
 
-        for (Map.Entry<String, List<Spending>> entry : grouped.entrySet()) {
-            String date = entry.getKey();
-            List<Spending> items = entry.getValue();
-
-            sb.append("<li><strong>").append(date).append("</strong>: ");
-
-            List<String> itemDescriptions = items.stream()
-                    .map(item -> String.format(
-                            "<strong>%,.0f VND</strong> cho <strong>%s</strong> (%s)",
-                            item.getAmount(),
-                            item.getDescription(),
-                            item.getCategory()
-                    ))
-                    .collect(Collectors.toList());
-
-            sb.append(String.join(", ", itemDescriptions)).append(".</li>");
+        for (Spending item : sortedSpendings) {
+            sb.append("<tr>")
+                    .append("<td>").append(item.getDescription()).append("</td>")
+                    .append("<td>").append(item.getCategory()).append("</td>")
+                    .append("<td>").append(this._formatDate(item.getDate())).append("</td>")
+                    .append("<td><strong>").append(this._formatAmount(item.getAmount())).append("</strong></td>")
+                    .append("</tr>");
         }
 
-        sb.append("</ul>");
+        sb.append("</tbody></table>");
         return sb.toString();
     }
+
 
     public String buildAddSpendingAnswer(List<SpendingItem> items) {
         if (items == null || items.isEmpty()) return "";
 
-        Map<LocalDate, List<SpendingItem>> groupedByDate = items.stream()
+        List<SpendingItem> sortedItems = items.stream()
                 .sorted(Comparator.comparing(SpendingItem::getDate))
-                .collect(Collectors.groupingBy(SpendingItem::getDate, LinkedHashMap::new, Collectors.toList()));
+                .toList();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Đã lưu các khoản chi tiêu sau:\n<ul>");
+        sb.append("Đã lưu các khoản chi tiêu sau:\n");
+        sb.append("<div><table>");
+        sb.append("<thead><tr>")
+                .append("<th>Giao dịch</th>")
+                .append("<th>Danh mục</th>")
+                .append("<th>Ngày</th>")
+                .append("<th>Số tiền</th>")
+                .append("</tr></thead>");
+        sb.append("<tbody>");
 
-        for (Map.Entry<LocalDate, List<SpendingItem>> entry : groupedByDate.entrySet()) {
-            LocalDate date = entry.getKey();
-            List<SpendingItem> spendings = entry.getValue();
-
-            sb.append("<li><strong>Ngày ").append(date).append(":</strong> ");
-
-            for (int i = 0; i < spendings.size(); i++) {
-                SpendingItem item = spendings.get(i);
-                sb.append(String.format("<strong>%,.0f VND</strong> cho <strong>%s</strong>", item.getAmount(), item.getDescription()));
-                if (i < spendings.size() - 1) sb.append(", ");
-            }
-
-            sb.append(".</li>");
+        for (SpendingItem item : sortedItems) {
+            sb.append("<tr>")
+                    .append("<td>").append(item.getDescription()).append("</td>")
+                    .append("<td>").append(item.getCategory()).append("</td>")
+                    .append("<td>").append(this._formatDate(item.getDate())).append("</td>")
+                    .append("<td>").append(this._formatAmount(item.getAmount())).append("₫</td>")
+                    .append("</tr>");
         }
 
-        sb.append("</ul>");
+        sb.append("</tbody></table></div>");
         return sb.toString();
     }
 
-    public String buildUpdateSpendingAnswer(List<SpendingItem[]> successfulUpdates, List<SpendingItem> notFoundSpendings) {
+    public String buildUpdateSpendingAnswer(List<Spending> successfulUpdates, List<SpendingItem> notFoundSpendings) {
         StringBuilder sb = new StringBuilder();
 
         if (!successfulUpdates.isEmpty()) {
-            sb.append("Đã cập nhật thành công ").append(successfulUpdates.size()).append(" khoản chi tiêu:\n<ul>");
-            for (SpendingItem[] pair : successfulUpdates) {
-                SpendingItem oldItem = pair[0];
-                SpendingItem newItem = pair[1];
+            if (successfulUpdates.size() == 1) {
+                Spending spending = successfulUpdates.getFirst();
+                sb.append("Đã sửa lại chi tiêu ")
+                        .append(spending.getDescription())
+                        .append(" thành ").append(this._formatAmount(spending.getAmount())).append(" ngày")
+                        .append(this._formatDate(spending.getDate()))
+                        .append("cho mục ").append(spending.getCategory()).append(" rồi nha!");
+            } else {
+                sb.append("<p>Tớ đã cập nhật các chi tiêu sau rồi nha:</p>");
+                sb.append("<div><table>");
+                sb.append("<thead><tr>")
+                        .append("<th>Giao dịch</th>")
+                        .append("<th>Danh mục</th>")
+                        .append("<th>Ngày</th>")
+                        .append("<th>Số tiền</th>")
+                        .append("</tr></thead>");
+                sb.append("<tbody>");
 
-                sb.append("<li>")
-                        .append("Từ <strong>")
-                        .append(_formatAmount(oldItem.getAmount())).append(" VND</strong> cho ")
-                        .append("<strong>").append(oldItem.getDescription()).append("</strong>")
-                        .append(" (").append(oldItem.getCategory()).append(") vào <strong>")
-                        .append(oldItem.getDate()).append("</strong>")
-                        .append(" → thành <strong>")
-                        .append(_formatAmount(newItem.getAmount())).append(" VND</strong> cho ")
-                        .append("<strong>").append(newItem.getDescription()).append("</strong>")
-                        .append(" (").append(newItem.getCategory()).append(") vào <strong>")
-                        .append(newItem.getDate()).append("</strong>")
-                        .append("</li>");
+                for (Spending item : successfulUpdates) {
+                    sb.append("<tr>")
+                            .append("<td>").append(item.getDescription()).append("</td>")
+                            .append("<td>").append(item.getCategory()).append("</td>")
+                            .append("<td>").append(item.getDate()).append("</td>")
+                            .append("<td>").append(this._formatAmount(item.getAmount())).append("₫</td>")
+                            .append("</tr>");
+                }
+
+                sb.append("</tbody></table></div>");
             }
-            sb.append("</ul>");
         }
 
         if (!notFoundSpendings.isEmpty()) {
-            sb.append("Không tìm thấy ").append(notFoundSpendings.size()).append(" khoản chi để cập nhật:\n<ul>");
-            for (SpendingItem item : notFoundSpendings) {
-                sb.append("<li>")
-                        .append("<strong>").append(_formatAmount(item.getAmount())).append(" VND</strong> cho ")
-                        .append("<strong>").append(item.getDescription()).append("</strong>")
-                        .append(" (").append(item.getCategory()).append(") vào <strong>")
-                        .append(item.getDate()).append("</strong>")
-                        .append("</li>");
-            }
-            sb.append("</ul>");
+            sb.append("<p>Bạn hãy cho tớ thêm thông tin về các khoản còn lại đế tớ cập nhật nhé. Tớ chưa thể cập nhật do thiếu thông tin 😊</p>");
         }
 
         return sb.toString();
     }
 
-    public String buildDeleteSpendingAnswer(List<SpendingItem> successfulDeletes, List<SpendingItem> notFoundSpendings) {
+    public String buildDeleteSpendingAnswer(List<Spending> successfulDeletions, List<SpendingItem> notFoundSpendings) {
         StringBuilder sb = new StringBuilder();
 
-        if (!successfulDeletes.isEmpty()) {
-            sb.append("Đã xoá thành công ").append(successfulDeletes.size()).append(" khoản chi tiêu:\n<ul>");
-            for (SpendingItem item : successfulDeletes) {
-                sb.append("<li>")
-                        .append("<strong>").append(_formatAmount(item.getAmount())).append(" VND</strong> cho ")
-                        .append("<strong>").append(item.getDescription()).append("</strong>")
-                        .append(" (").append(item.getCategory()).append(") vào <strong>")
-                        .append(item.getDate()).append("</strong>")
-                        .append("</li>");
+        if (!successfulDeletions.isEmpty()) {
+            if (successfulDeletions.size() == 1) {
+                Spending spending = successfulDeletions.getFirst();
+                sb.append("Tớ đã xoá chi tiêu ")
+                        .append(spending.getDescription())
+                        .append(" thành ").append(this._formatAmount(spending.getAmount())).append(" ngày")
+                        .append(this._formatDate(spending.getDate()))
+                        .append("cho mục ").append(spending.getCategory()).append(" rồi nha!");
+            } else {
+                sb.append("<p>Tớ đã xoá các chi tiêu sau rồi nha:</p>");
+                sb.append("<div><table>");
+                sb.append("<thead><tr>")
+                        .append("<th>Giao dịch</th>")
+                        .append("<th>Danh mục</th>")
+                        .append("<th>Ngày</th>")
+                        .append("<th>Số tiền</th>")
+                        .append("</tr></thead>");
+                sb.append("<tbody>");
+
+                for (Spending item : successfulDeletions) {
+                    sb.append("<tr>")
+                            .append("<td>").append(item.getDescription()).append("</td>")
+                            .append("<td>").append(item.getCategory()).append("</td>")
+                            .append("<td>").append(this._formatDate(item.getDate())).append("</td>")
+                            .append("<td>").append(this._formatAmount(item.getAmount())).append("</td>")
+                            .append("</tr>");
+                }
+
+                sb.append("</tbody></table></div>");
             }
-            sb.append("</ul>");
         }
 
         if (!notFoundSpendings.isEmpty()) {
-            sb.append("Không tìm thấy ").append(notFoundSpendings.size()).append(" khoản chi để xoá:\n<ul>");
-            for (SpendingItem item : notFoundSpendings) {
-                sb.append("<li>")
-                        .append("<strong>").append(_formatAmount(item.getAmount())).append(" VND</strong> cho ")
-                        .append("<strong>").append(item.getDescription()).append("</strong>")
-                        .append(" (").append(item.getCategory()).append(") vào <strong>")
-                        .append(item.getDate()).append("</strong>")
-                        .append("</li>");
-            }
-            sb.append("</ul>");
+            sb.append("<p>Bạn hãy cho tớ thêm thông tin về các khoản còn lại đế tớ xoá nhé. Tớ chưa thể xoá do thiếu thông tin 😊</p>");
         }
 
         return sb.toString();
@@ -196,7 +201,10 @@ public class AnswerService {
 
     private String _formatAmount(Double amount) {
         if (amount == null) return "0";
-        return String.format("%,.0f", amount);
+        return String.format("%,.0f", amount).replace(",", ".") + "₫";
     }
 
+    private String _formatDate(LocalDate date) {
+        return date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    }
 }

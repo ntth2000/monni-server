@@ -1,24 +1,26 @@
 package com.monniserver.dto;
 
+import com.monniserver.entity.Spending;
+
 import java.util.List;
 
 public class DeleteSpendingResult {
-    private List<SpendingItem> successfulDeletions;
+    private List<Spending> successfulDeletions;
     private List<SpendingItem> notFoundSpendings;
 
     public DeleteSpendingResult() {
     }
 
-    public DeleteSpendingResult(List<SpendingItem> successfulDeletions, List<SpendingItem> notFoundSpendings) {
+    public DeleteSpendingResult(List<Spending> successfulDeletions, List<SpendingItem> notFoundSpendings) {
         this.successfulDeletions = successfulDeletions;
         this.notFoundSpendings = notFoundSpendings;
     }
 
-    public List<SpendingItem> getSuccessfulDeletions() {
+    public List<Spending> getSuccessfulDeletions() {
         return successfulDeletions;
     }
 
-    public void setSuccessfulDeletions(List<SpendingItem> successfulDeletions) {
+    public void setSuccessfulDeletions(List<Spending> successfulDeletions) {
         this.successfulDeletions = successfulDeletions;
     }
 

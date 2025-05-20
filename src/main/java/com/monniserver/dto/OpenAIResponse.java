@@ -21,6 +21,7 @@ public class OpenAIResponse {
     private String category;
     private String description;
     private String date;
+    private String message;
 
     // Getters and Setters
 
@@ -134,5 +135,13 @@ public class OpenAIResponse {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

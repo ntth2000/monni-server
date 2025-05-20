@@ -1,7 +1,6 @@
 package com.monniserver.controller;
 
 import com.monniserver.config.JwtUtil;
-import com.monniserver.dto.AuthTokenResponse;
 import com.monniserver.dto.LoginRequest;
 import com.monniserver.dto.RegisterRequest;
 import com.monniserver.entity.User;
@@ -9,6 +8,7 @@ import com.monniserver.service.AuthService;
 import com.monniserver.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +30,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody @Valid RegisterRequest request) {
         authService.register(request);
+
         return ResponseEntity.ok("User registered successfully");
     }
 
@@ -93,7 +94,10 @@ public class AuthController {
 
 
     @PostMapping("/refresh")
-    public ResponseEntity<AuthTokenResponse> refresh(@CookieValue("refreshToken") String refreshToken) {
+    public ResponseEntity<String> refresh(@CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token is missing");
+        }
         User user = refreshTokenService.getUserFromRefreshToken(refreshToken);
         String newAccessToken = jwtUtil.generateJwtToken(user.getId());
 
@@ -105,9 +109,9 @@ public class AuthController {
                 .sameSite("Lax")
                 .build();
 
-        return ResponseEntity.ok()
-                .header("Set-Cookie", accessTokenCookie.toString())
-                .body(new AuthTokenResponse(newAccessToken, refreshToken));
+        response.addHeader("Set-Cookie", accessTokenCookie.toString());
+
+        return ResponseEntity.ok("Refresh succcessfully.");
     }
 
 }

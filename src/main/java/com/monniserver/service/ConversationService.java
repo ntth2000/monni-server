@@ -38,7 +38,6 @@ public class ConversationService {
     }
 
     public List<ConversationResponse> findByUserId(UUID userId) {
-        System.out.println("Finding conversations for user: " + userId);
         return conversationRepository.findByUserIdOrderByCreatedAtAsc(userId)
                 .stream()
                 .map(h -> {
@@ -71,20 +70,37 @@ public class ConversationService {
 
             try {
                 switch (intent) {
-                    case "add_spending":
-                        for (SpendingItem item : userRequest.getDetailSpendings()) {
-                            Spending spending = new Spending(
-                                    item.getAmount(),
-                                    item.getCategory(),
-                                    item.getDescription(),
-                                    item.getDate(),
-                                    user
-                            );
-                            spendingRepository.save(spending);
-                        }
-                        answer = answerService.buildAddSpendingAnswer(userRequest.getDetailSpendings());
+                    case "app_intro":
+                        answer = "<p>Tớ là Monni - trợ lý tài chính cá nhân, giúp bạn ghi lại và theo dõi các khoản chi tiêu hằng ngày \uD83D\uDCB0</p>\n" +
+                                "\n" +
+                                "<p>Với tớ, bạn có thể:</p>\n" +
+                                "<ul>\n" +
+                                "  <li>\uD83D\uDCDD Ghi lại các khoản chi tiêu</li>\n" +
+                                "  <li>✏\uFE0F Cập nhật hoặc xóa các giao dịch đã ghi trước đó</li>\n" +
+                                "  <li>\uD83D\uDCCA Xem tổng chi tiêu theo khoảng thời gian (ngày, tuần, tháng, hoặc tùy chọn)</li>\n" +
+                                "  <li>\uD83D\uDD0D Xem chi tiết các khoản chi theo danh mục hoặc mô tả</li>\n" +
+                                "</ul>\n" +
+                                "</br>" +
+                                "<p>Ví dụ, bạn chỉ cần nói: <em>“Hôm nay mua cà phê 25.000, gửi xe 5.000”</em><br>\n" +
+                                "Tớ sẽ tự động ghi lại giúp bạn \uD83D\uDE0A</p>\n";
                         break;
-
+                    case "add_spending":
+                        if (userRequest.getMessage() != null) {
+                            answer = userRequest.getMessage();
+                        } else {
+                            for (SpendingItem item : userRequest.getDetailSpendings()) {
+                                Spending spending = new Spending(
+                                        item.getAmount(),
+                                        item.getCategory(),
+                                        item.getDescription(),
+                                        item.getDate(),
+                                        user
+                                );
+                                spendingRepository.save(spending);
+                            }
+                            answer = answerService.buildAddSpendingAnswer(userRequest.getDetailSpendings());
+                        }
+                        break;
                     case "get_summary":
                     case "get_detail":
                         LocalDate startDate = _formatDate(userRequest.getStartDate());
@@ -111,17 +127,17 @@ public class ConversationService {
                         List<SpendingItem> oldItems = userRequest.getNeedUpdatedSpendings();
                         List<SpendingItem> newItems = userRequest.getUpdatedSpendings();
                         if (oldItems != null && newItems != null && oldItems.size() == newItems.size()) {
-                            UpdateSpendingResult updateResult = spendingService.updateMultipleSpendings(userId, oldItems, newItems);
+                            UpdateSpendingResult updateResult = spendingService.updateSpendings(userId, oldItems, newItems);
                             answer = answerService.buildUpdateSpendingAnswer(updateResult.getSuccessfulUpdates(), updateResult.getNotFoundSpendings());
                         } else {
-                            answer = "Danh sách cập nhật không hợp lệ. Hãy đảm bảo mỗi khoản chi cần cập nhật có dữ liệu tương ứng.";
+                            answer = "Xin lỗi, tớ bạn hãy cung cấp thêm thông tin để tớ thực hiện chỉnh sửa chi tiêu nha!";
                         }
                         break;
 
                     case "delete_spending":
                         List<SpendingItem> deleteItems = userRequest.getDeleteSpendings();
                         if (deleteItems == null || deleteItems.isEmpty()) {
-                            answer = "Chi tiêu cần xoá không hợp lệ. Hãy thử lại.";
+                            answer = "Xin lỗi, tớ bạn hãy cung cấp thêm thông tin để tớ thực hiện xoá chi tiêu nha!";
                         } else {
                             DeleteSpendingResult deleteResult = spendingService.deleteSpendings(userId, deleteItems);
                             answer = answerService.buildDeleteSpendingAnswer(deleteResult.getSuccessfulDeletions(), deleteResult.getNotFoundSpendings());
@@ -129,15 +145,15 @@ public class ConversationService {
                         break;
 
                     case "greeting":
-                        answer = "Xin chào, tôi có thể giúp gì cho bạn hôm nay?";
+                        answer = "Xin chào, tớ có thể giúp gì trong việc quản lí chi tiêu nhỉ? Hãy nói cho tớ biết nha! 😊";
                         break;
 
                     case "unknown":
-                        answer = "Xin lỗi, tôi chưa hỗ trợ chức năng này.";
+                        answer = userRequest.getMessage();
                         break;
 
                     default:
-                        answer = "Xin lỗi, không hiểu yêu cầu của bạn.";
+                        answer = "Xin lỗi, tớ không hiểu yêu cầu của bạn.";
                         break;
                 }
             } catch (Exception e) {
@@ -146,7 +162,7 @@ public class ConversationService {
             }
 
             if (!answer.isEmpty()) {
-                finalAnswer.append(answer).append("<br/>");
+                finalAnswer.append(answer);
             }
         }
 

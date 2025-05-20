@@ -72,20 +72,15 @@ public class OpenAIService {
         systemPrompt.append("Hi, I'm MonniServer. Today is: ").append(getToday()).append(". ");
         systemPrompt.append(this.prompt);
         systemPrompt.append("This is the current user message: ").append(userMsg).append(".");
-        systemPrompt.append("This is the 3 latest messages : ");
+        systemPrompt.append("This is the 5 latest question and answer (from the latest to furthest): ");
 
-        previousMessages.forEach(m -> systemPrompt.append(m.getQuestion()).append("; "));
+        previousMessages.forEach(m -> systemPrompt.append("question: ").append(m.getQuestion()).append(", answer: ").append(m.getAnswer()).append("; "));
 
         ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
                 .addUserMessage(systemPrompt.toString())
                 .model(ChatModel.GPT_4_1)
                 .build();
 
-        ChatCompletion chatCompletion = openAIClient.chat().completions().create(params);
-
-        System.out.println(chatCompletion);
-
-
-        return chatCompletion;
+        return openAIClient.chat().completions().create(params);
     }
 }

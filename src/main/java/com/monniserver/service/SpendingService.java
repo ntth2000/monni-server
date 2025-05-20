@@ -41,46 +41,44 @@ public class SpendingService {
     }
 
     @Transactional
-    public UpdateSpendingResult updateMultipleSpendings(UUID userId, List<SpendingItem> oldItems, List<SpendingItem> newItems) {
-        List<SpendingItem[]> successfulUpdates = new ArrayList<>();
+    public UpdateSpendingResult updateSpendings(UUID userId, List<SpendingItem> oldItems, List<SpendingItem> newItems) {
+        List<Spending> successfulUpdates = new ArrayList<>();
         List<SpendingItem> notFoundSpendings = new ArrayList<>();
 
         for (int i = 0; i < oldItems.size(); i++) {
             SpendingItem oldItem = oldItems.get(i);
             SpendingItem newItem = newItems.get(i);
 
-            if (oldItem.getDate() != null || oldItem.getCategory() != null || oldItem.getDescription() != null || oldItem.getAmount() != null) {
-                List<Spending> matched = spendingRepository.findByUserIdAndOptionalFields(
-                        userId,
-                        oldItem.getDate(),
-                        oldItem.getCategory(),
-                        oldItem.getDescription(),
-                        oldItem.getAmount()
-                );
+            List<Spending> matched = spendingRepository.findByUserIdAndOptionalFields(
+                    userId,
+                    oldItem.getDate(),
+                    oldItem.getCategory(),
+                    oldItem.getDescription(),
+                    oldItem.getAmount()
+            );
 
-                Spending spending = matched.stream().findFirst().orElse(null);
-                if (spending == null) {
-                    notFoundSpendings.add(oldItem);
-                } else {
-                    try {
-                        if (newItem.getDate() != null) {
-                            spending.setDate(newItem.getDate());
-                        }
-                        if (newItem.getCategory() != null) {
-                            spending.setCategory(newItem.getCategory());
-                        }
-                        if (newItem.getDescription() != null) {
-                            spending.setDescription(newItem.getDescription());
-                        }
-                        if (newItem.getAmount() != null) {
-                            spending.setAmount(newItem.getAmount());
-                        }
-                        spendingRepository.save(spending);
-                        successfulUpdates.add(new SpendingItem[]{oldItem, newItem});
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        throw new SpendingSaveException("Có lỗi xảy ra khi cập nhật chi tiêu, vui lòng thử lại.");
+            Spending spending = matched.stream().findFirst().orElse(null);
+            if (spending == null) {
+                notFoundSpendings.add(oldItem);
+            } else {
+                try {
+                    if (newItem.getDate() != null) {
+                        spending.setDate(newItem.getDate());
                     }
+                    if (newItem.getCategory() != null) {
+                        spending.setCategory(newItem.getCategory());
+                    }
+                    if (newItem.getDescription() != null) {
+                        spending.setDescription(newItem.getDescription());
+                    }
+                    if (newItem.getAmount() != null) {
+                        spending.setAmount(newItem.getAmount());
+                    }
+                    spendingRepository.save(spending);
+                    successfulUpdates.add(spending);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new SpendingSaveException("Có lỗi xảy ra khi cập nhật chi tiêu, vui lòng thử lại.");
                 }
             }
         }
@@ -90,7 +88,7 @@ public class SpendingService {
 
     @Transactional
     public DeleteSpendingResult deleteSpendings(UUID userId, List<SpendingItem> deleteItems) {
-        List<SpendingItem> successfulDeletes = new ArrayList<>();
+        List<Spending> successfulDeletes = new ArrayList<>();
         List<SpendingItem> notFoundSpendings = new ArrayList<>();
 
         for (SpendingItem item : deleteItems) {
@@ -108,7 +106,7 @@ public class SpendingService {
                     notFoundSpendings.add(item);
                 } else {
                     spendingRepository.delete(spending);
-                    successfulDeletes.add(item);
+                    successfulDeletes.add(spending);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
